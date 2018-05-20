@@ -14,6 +14,7 @@ import io.netty.handler.codec.http.HttpHeaderNames;
 import io.netty.handler.codec.http.HttpResponse;
 import io.netty.handler.codec.http.HttpResponseStatus;
 import io.netty.handler.codec.http.HttpVersion;
+import io.netty.handler.codec.http.LastHttpContent;
 import io.netty.handler.stream.ChunkedFile;
 import io.netty.util.CharsetUtil;
 
@@ -57,7 +58,8 @@ public class HttpFileServerHandler extends SimpleChannelInboundHandler<FullHttpR
 		response.headers().set(HttpHeaderNames.CONTENT_LENGTH,file.length());
 		response.headers().set(HttpHeaderNames.TRANSFER_ENCODING,"chunked");
 		ctx.write(response);
-		ctx.writeAndFlush(new ChunkedFile(raf,120)).addListener(ChannelFutureListener.CLOSE);
+		ctx.writeAndFlush(new ChunkedFile(raf,120));
+		ctx.writeAndFlush(LastHttpContent.EMPTY_LAST_CONTENT).addListener(ChannelFutureListener.CLOSE);
 	}
 	
 	public void sendSimpleResponse(ChannelHandlerContext ctx, HttpResponseStatus status) {
