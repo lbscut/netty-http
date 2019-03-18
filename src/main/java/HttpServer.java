@@ -1,3 +1,5 @@
+import javax.net.ssl.SSLEngine;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
@@ -8,6 +10,7 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.HttpRequestDecoder;
 import io.netty.handler.codec.http.HttpResponseEncoder;
+import io.netty.handler.ssl.SslHandler;
 import io.netty.handler.stream.ChunkedWriteHandler;
 
 public class HttpServer {
@@ -21,6 +24,9 @@ public class HttpServer {
 			  .childHandler(new ChannelInitializer<Channel>() {
 				@Override
 				protected void initChannel(Channel ch) throws Exception {
+					SSLEngine sslEngine = SSLContextFactory.getSslContext().createSSLEngine();
+                    sslEngine.setUseClientMode(false);
+                    ch.pipeline().addLast(new SslHandler(sslEngine));
 					ch.pipeline().addLast(new HttpRequestDecoder());//Decodes ByteBufs into HttpRequests and HttpContents.
 					ch.pipeline().addLast(new HttpObjectAggregator(65536));//将HttpRequests和HttpContents整合成FullHttpRequest
 					ch.pipeline().addLast(new HttpResponseEncoder());//Encodes an HttpResponse or an HttpContent into a ByteBuf.
